@@ -10,7 +10,7 @@ import (
 	"github.com/Markuysa/pkg/logger"
 	"github.com/Markuysa/pkg/postgres"
 	"github.com/Markuysa/pkg/srv/grpc"
-	"gitlab.com/coinhubs/balance/internal/config"
+	"github.com/teachme-group/user/internal/config"
 )
 
 func Run(_ context.Context, cfg *config.Config) error {

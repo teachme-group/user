@@ -1,8 +1,8 @@
 package client
 
 import (
-	"gitlab.com/coinhubs/balance/internal/domain"
-	"gitlab.com/coinhubs/balance/internal/storage/postgres"
+	"github.com/teachme-group/user/internal/domain"
+	"github.com/teachme-group/user/internal/storage/postgres"
 )
 
 func userFromRepository(user postgres.User) domain.User {

@@ -5,7 +5,7 @@ import (
 	v1 "session/pkg/api/grpc/v1"
 	"time"
 
-	"gitlab.com/coinhubs/balance/internal/domain"
+	"github.com/teachme-group/user/internal/domain"
 )
 
 type (

@@ -5,10 +5,10 @@ import (
 	"pkg/errlist"
 	"pkg/signer"
 	"pkg/validate"
-	v1 "user/pkg/api/grpc/v1"
+	v1 "github.com/teachme-group/user/pkg/api/grpc/v1"
 
 	"github.com/Markuysa/pkg/tracer"
-	"gitlab.com/coinhubs/balance/internal/domain"
+	"github.com/teachme-group/user/internal/domain"
 )
 
 func (s *service) SignUpRequest(

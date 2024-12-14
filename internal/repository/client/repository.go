@@ -8,9 +8,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	redisCli "github.com/redis/go-redis/v9"
-	"gitlab.com/coinhubs/balance/internal/domain"
-	"gitlab.com/coinhubs/balance/internal/storage/postgres"
-	"gitlab.com/coinhubs/balance/internal/storage/redis"
+	"github.com/teachme-group/user/internal/domain"
+	"github.com/teachme-group/user/internal/storage/postgres"
+	"github.com/teachme-group/user/internal/storage/redis"
 )
 
 type repository struct {

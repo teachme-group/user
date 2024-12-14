@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"gitlab.com/coinhubs/balance/internal/storage/postgres"
+	"github.com/teachme-group/user/internal/storage/postgres"
 )
 
 type (

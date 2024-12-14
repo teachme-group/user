@@ -1,8 +1,8 @@
-module gitlab.com/coinhubs/balance
+module github.com/teachme-group/user
 
 go 1.23.3
 
-replace user/pkg => ./pkg
+replace github.com/teachme-group/user/pkg => ./pkg
 
 require (
 	github.com/Markuysa/pkg v1.2.14
@@ -10,7 +10,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/redis/go-redis/v9 v9.7.0
-	user/pkg v0.0.0-00010101000000-000000000000
+	github.com/teachme-group/user/pkg v0.0.0-00010101000000-000000000000
 )
 
 require (
