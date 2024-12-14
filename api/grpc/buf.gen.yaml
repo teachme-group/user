@@ -1,0 +1,11 @@
+version: v1
+plugins:
+  - name: openapiv2
+    out: ../../docs
+    opt: logtostderr=true
+  - name: doc
+    out: ../../docs
+    opt: html,api.html
+  - name: go
+    out: pkg
+    opt: paths=source_relative

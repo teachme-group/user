@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package user.v1;
+
+option go_package = "/v1";
+
+service UserService {
+  rpc SignUpInit(SignUpInitRequest) returns (SignUpInitResponse) {}
+  rpc SignUpFinalize(SignUpFinalizeRequest) returns (SignUpFinalizeResponse) {}
+  rpc SignInInit(SignInInitRequest) returns (SignInInitResponse) {}
+  rpc SignInFinalize(SignInFinalizeRequest) returns (SignInFinalizeResponse) {}
+}
+
+message SignUpInitRequest {
+  string email = 1;
+  string password = 2;
+  string login = 3;
+  string sign_up_token = 4;
+}
+
+message SignUpInitResponse {
+  string sign_up_token = 1;
+  int64  sign_up_session_lifetime = 3;
+}
+
+message SignUpFinalizeRequest {
+  string sign_up_token = 1;
+  string verification_code = 2;
+}
+
+message SignUpFinalizeResponse {
+  string session_id = 1;
+}
+
+message SignInInitRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message SignInInitResponse {
+  string session_id = 1;
+}
+
+message SignInFinalizeRequest {
+  string session_id = 1;
+  string otp = 2;
+}
+
+message SignInFinalizeResponse {}
