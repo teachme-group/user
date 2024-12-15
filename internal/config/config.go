@@ -1,8 +1,11 @@
 package config
 
 import (
+	"github.com/Markuysa/pkg/consul"
 	"github.com/Markuysa/pkg/log"
 	"github.com/Markuysa/pkg/postgres"
+	"github.com/Markuysa/pkg/prober"
+	promLoager "github.com/Markuysa/pkg/prometheus"
 	"github.com/Markuysa/pkg/redis"
 	"github.com/Markuysa/pkg/srv/grpc"
 	"github.com/teachme-group/user/internal/misc/clients/session"
@@ -20,4 +23,7 @@ type Config struct {
 	ClientConfig client.Config         `validate:"required" yaml:"client_config"`
 	Mail         mail.Config           `validate:"required" yaml:"mail"`
 	OauthConfig  oauth.ProvidersConfig `validate:"required" yaml:"oauth_config"`
+	Consul       consul.Config         `validate:"required" yaml:"consul"`
+	Probes       prober.Config         `validate:"required" yaml:"probes"`
+	Prometheus   promLoager.Config     `validate:"required" yaml:"prometheus"`
 }

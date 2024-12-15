@@ -24,11 +24,6 @@ import (
 func Run(_ context.Context, cfg *config.Config) error {
 	cl := closer.New()
 
-	err := log.InitLogger(cfg.Logger)
-	if err != nil {
-		return err
-	}
-
 	pg, err := postgres.New(
 		cfg.Postgres,
 		postgres.WithMigrate(
