@@ -22,8 +22,8 @@ spec:
             - name: CONFIG_PATH
               value: "internal/config/config.yaml"
           volumeMounts:
-            - name: config-volume
-              mountPath: internal/config/config.yaml
+            - name: config-data
+              mountPath: /internal/config
           readinessProbe:
             httpGet:
               path: /health
@@ -44,8 +44,9 @@ spec:
               cpu: "500m"
               memory: "512Mi"
       volumes:
-        - name: config-volume
+        - name: config-data
           configMap:
+            defaultMode: 420
             name: user-configmap
 ---
 apiVersion: autoscaling/v1
