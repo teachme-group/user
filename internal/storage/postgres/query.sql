@@ -5,3 +5,8 @@ values ($1, $2, $3, $4)
 
 -- name: ValidateUserSignUp :one
 select exists(select 1 from "user" where login = $1 or email = $2) as exists;
+
+-- name: GetUserByEmail :one
+select id, login, email, password, created_at
+from "user"
+where email = $1;

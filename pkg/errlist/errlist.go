@@ -9,4 +9,5 @@ var (
 	ErrLoginOrEmailAlreadyExists = errs.New("INVALID_LOGIN_OR_EMAIL", errs.InvalidArgument, 10_4)
 	ErrInvalidVerifyCode         = errs.New("INVALID_VERIFY_CODE", errs.InvalidArgument, 10_5)
 	ErrProviderNotFound          = errs.New("INVALID_OAUTH_PROVIDER", errs.InvalidArgument, 10_6)
+	ErrInvalidLoginCredentials   = errs.New("INVALID_EMAIL_OR_PASSWORD", errs.InvalidArgument, 10_7)
 )

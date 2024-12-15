@@ -2,7 +2,9 @@ package client
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -79,4 +81,17 @@ func (r *repository) ValidateUserSignUp(ctx context.Context, email string) error
 	}
 
 	return nil
+}
+
+func (r *repository) GetUserByEmail(ctx context.Context, email string) (domain.User, error) {
+	user, err := r.pgConn.Queries(ctx).GetUserByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.User{}, errlist.ErrInvalidLoginCredentials
+		}
+
+		return domain.User{}, fmt.Errorf("failed to get user by email: %w", err)
+	}
+
+	return userFromRepository(user), nil
 }

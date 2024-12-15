@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: api/grpc/v1/sign_in.proto
+// source: v1/sign_in.proto
 
 package v1
 
@@ -19,8 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SignInService_SignInInit_FullMethodName     = "/v1.SignInService/SignInInit"
-	SignInService_SignInFinalize_FullMethodName = "/v1.SignInService/SignInFinalize"
+	SignInService_SignInInit_FullMethodName = "/v1.SignInService/SignInInit"
 )
 
 // SignInServiceClient is the client API for SignInService service.
@@ -28,7 +27,6 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SignInServiceClient interface {
 	SignInInit(ctx context.Context, in *SignInInitRequest, opts ...grpc.CallOption) (*SignInInitResponse, error)
-	SignInFinalize(ctx context.Context, in *SignInFinalizeRequest, opts ...grpc.CallOption) (*SignInFinalizeResponse, error)
 }
 
 type signInServiceClient struct {
@@ -49,22 +47,11 @@ func (c *signInServiceClient) SignInInit(ctx context.Context, in *SignInInitRequ
 	return out, nil
 }
 
-func (c *signInServiceClient) SignInFinalize(ctx context.Context, in *SignInFinalizeRequest, opts ...grpc.CallOption) (*SignInFinalizeResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SignInFinalizeResponse)
-	err := c.cc.Invoke(ctx, SignInService_SignInFinalize_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // SignInServiceServer is the server API for SignInService service.
 // All implementations must embed UnimplementedSignInServiceServer
 // for forward compatibility.
 type SignInServiceServer interface {
 	SignInInit(context.Context, *SignInInitRequest) (*SignInInitResponse, error)
-	SignInFinalize(context.Context, *SignInFinalizeRequest) (*SignInFinalizeResponse, error)
 	mustEmbedUnimplementedSignInServiceServer()
 }
 
@@ -77,9 +64,6 @@ type UnimplementedSignInServiceServer struct{}
 
 func (UnimplementedSignInServiceServer) SignInInit(context.Context, *SignInInitRequest) (*SignInInitResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignInInit not implemented")
-}
-func (UnimplementedSignInServiceServer) SignInFinalize(context.Context, *SignInFinalizeRequest) (*SignInFinalizeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SignInFinalize not implemented")
 }
 func (UnimplementedSignInServiceServer) mustEmbedUnimplementedSignInServiceServer() {}
 func (UnimplementedSignInServiceServer) testEmbeddedByValue()                       {}
@@ -120,24 +104,6 @@ func _SignInService_SignInInit_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SignInService_SignInFinalize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SignInFinalizeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SignInServiceServer).SignInFinalize(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: SignInService_SignInFinalize_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SignInServiceServer).SignInFinalize(ctx, req.(*SignInFinalizeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // SignInService_ServiceDesc is the grpc.ServiceDesc for SignInService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -149,11 +115,7 @@ var SignInService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "SignInInit",
 			Handler:    _SignInService_SignInInit_Handler,
 		},
-		{
-			MethodName: "SignInFinalize",
-			Handler:    _SignInService_SignInFinalize_Handler,
-		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/grpc/v1/sign_in.proto",
+	Metadata: "v1/sign_in.proto",
 }

@@ -18,7 +18,7 @@ func (t transport) GetOauthSignUpUrls(
 	return t.service.GetOauthSignUpUrls(ctx, request)
 }
 
-func (t transport) GoogleSignUpCallback(
+func (t transport) HandleOauthCallback(
 	ctx context.Context,
 	request *v1.HandleOauthCallbackRequest,
 ) (*v1.HandleOauthCallbackResponse, error) {
@@ -37,9 +37,16 @@ func (t transport) SignUpInit(ctx context.Context, request *v1.SignUpInitRequest
 	return t.service.SignUpRequest(ctx, request)
 }
 
-func (t transport) SignUpFinalize(ctx context.Context, request *v1.SignUpFinalizeRequest) (*v1.SignUpFinalizeResponse, error) {
+func (t transport) SignUpConfirmEmail(ctx context.Context, request *v1.SignUpConfirmEmailRequest) (*v1.SignUpConfirmEmailResponse, error) {
 	ctx, span, _ := tracer.NewSpan(ctx)
 	defer span.Finish()
 
-	return t.service.SignUpConfirm(ctx, request)
+	return t.service.SignUpConfirmEmail(ctx, request)
+}
+
+func (t transport) SignUpEnterPassword(ctx context.Context, request *v1.SignUpEnterPasswordRequest) (*v1.SignUpEnterPasswordResponse, error) {
+	ctx, span, _ := tracer.NewSpan(ctx)
+	defer span.Finish()
+
+	return t.service.SignUpEnterPassword(ctx, request)
 }

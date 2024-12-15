@@ -4,9 +4,15 @@ package v1;
 
 option go_package = "/v1";
 
+import "google/api/annotations.proto";
+
 service SignInService {
-  rpc SignInInit(SignInInitRequest) returns (SignInInitResponse) {}
-  rpc SignInFinalize(SignInFinalizeRequest) returns (SignInFinalizeResponse) {}
+  rpc SignInInit(SignInInitRequest) returns (SignInInitResponse) {
+    option (google.api.http) = {
+      post: "/v1/signin/init"
+      body: "*"
+    };
+  }
 }
 
 message SignInInitRequest {
@@ -17,10 +23,3 @@ message SignInInitRequest {
 message SignInInitResponse {
   string session_id = 1;
 }
-
-message SignInFinalizeRequest {
-  string session_id = 1;
-  string otp = 2;
-}
-
-message SignInFinalizeResponse {}

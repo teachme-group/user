@@ -16,6 +16,7 @@ type (
 		SaveSignUpStep(ctx context.Context, key string, step domain.SignUpStep, ttl time.Duration) error
 		GetSignUpStep(ctx context.Context, key string) (domain.SignUpStep, error)
 		ValidateUserSignUp(ctx context.Context, email string) error
+		GetUserByEmail(ctx context.Context, email string) (domain.User, error)
 	}
 	mailer interface {
 		Send(ctx context.Context, to, subject, body string) error

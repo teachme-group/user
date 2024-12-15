@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io"
-
 	"net/url"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/teachme-group/user/internal/domain"
 	"github.com/teachme-group/user/pkg/errlist"
 	"golang.org/x/oauth2"
@@ -30,9 +28,9 @@ func (o *oauth) AuthCodeURLs(state string, provider *string, opts ...oauth2.Auth
 	result := make(map[string]string)
 	if provider == nil {
 		for prov, creds := range o.oauthCfg {
-			result[string(prov)] = creds.oauth.AuthCodeURL(state, opts...)
+			authCodeOpts := append(opts, oauth2.SetAuthURLParam("response_type", "code"))
+			result[string(prov)] = creds.oauth.AuthCodeURL(state, authCodeOpts...)
 		}
-
 		return result, nil
 	}
 
@@ -41,7 +39,8 @@ func (o *oauth) AuthCodeURLs(state string, provider *string, opts ...oauth2.Auth
 		return nil, errlist.ErrProviderNotFound
 	}
 
-	result[*provider] = crds.oauth.AuthCodeURL(state, opts...)
+	authCodeOpts := append(opts, oauth2.SetAuthURLParam("response_type", "code"))
+	result[*provider] = crds.oauth.AuthCodeURL(state, authCodeOpts...)
 
 	return result, nil
 }
@@ -80,14 +79,24 @@ func (o *oauth) ProcessCallback(ctx context.Context, provider Provider, _ []byte
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return user, fmt.Errorf("failed to fetch user profile: %s", resp.Status)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return user, fmt.Errorf("failed to read response body: %v", err)
 	}
 
-	if err := mapstructure.Decode(body, &user); err != nil {
-		return user, fmt.Errorf("failed to unmarshal user profile: %v", err)
+	unmarshal, ok := unmarshaler[provider]
+	if !ok {
+		return user, fmt.Errorf("unmarshaler not found for provider %s", provider)
 	}
 
-	return user, nil
+	unmarshalResponse, err := unmarshal(body)
+	if err != nil {
+		return user, fmt.Errorf("failed to unmarshal response: %v", err)
+	}
+
+	return unmarshalResponse.ToUser(), nil
 }

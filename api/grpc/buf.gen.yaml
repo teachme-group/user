@@ -7,8 +7,11 @@ plugins:
     out: ../../docs
     opt: html,api.html
   - name: go
-    out: pkg
+    out: pkg/api/grpc
     opt: paths=source_relative
   - name: go-grpc
-    out: pkg
+    out: pkg/api/grpc
+    opt: paths=source_relative
+  - name: grpc-gateway
+    out: pkg/api/grpc
     opt: paths=source_relative

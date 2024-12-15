@@ -13,3 +13,8 @@ func EncryptPassword(password string) (string, error) {
 
 	return string(hashedPassword), nil
 }
+
+// ComparePasswords compares the given password with the hashed password.
+func ComparePasswords(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}

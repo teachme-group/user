@@ -4,32 +4,66 @@ package v1;
 
 option go_package = "/v1";
 
-service SignUpService {
-  rpc SignUpInit(SignUpInitRequest) returns (SignUpInitResponse) {}
-  rpc SignUpFinalize(SignUpFinalizeRequest) returns (SignUpFinalizeResponse) {}
+import "google/api/annotations.proto";
 
-  rpc GetOauthSignUpUrls(GetOauthSignUpUrlRequest) returns (GetOauthSignUpUrlResponse) {}
-  rpc HandleOauthCallback(HandleOauthCallbackRequest) returns (HandleOauthCallbackResponse) {}
+service SignUpService {
+  rpc SignUpInit(SignUpInitRequest) returns (SignUpInitResponse) {
+    option (google.api.http) = {
+      post: "/v1/signup/init"
+      body: "*"
+    };
+  }
+  rpc SignUpConfirmEmail(SignUpConfirmEmailRequest) returns (SignUpConfirmEmailResponse) {
+    option (google.api.http) = {
+      post: "/v1/signup/confirm_email"
+      body: "*"
+    };
+  }
+  rpc SignUpEnterPassword(SignUpEnterPasswordRequest) returns (SignUpEnterPasswordResponse) {
+    option (google.api.http) = {
+      post: "/v1/signup/enter_password"
+      body: "*"
+    };
+  }
+  rpc GetOauthSignUpUrls(GetOauthSignUpUrlRequest) returns (GetOauthSignUpUrlResponse) {
+    option (google.api.http) = {
+      get: "/v1/signup/oauth_urls"
+    };
+  }
+  rpc HandleOauthCallback(HandleOauthCallbackRequest) returns (HandleOauthCallbackResponse) {
+    option (google.api.http) = {
+      post: "/v1/signup/oauth_callback"
+      body: "*"
+    };
+  }
 }
 
 message SignUpInitRequest {
   string email = 1;
-  string password = 2;
-  string login = 3;
-  string sign_up_token = 4;
+  string login = 2;
+  string sign_up_token = 3;
 }
 
 message SignUpInitResponse {
   string sign_up_token = 1;
-  int64  sign_up_session_lifetime = 3;
+  int64 sign_up_session_lifetime = 3;
 }
 
-message SignUpFinalizeRequest {
+message SignUpConfirmEmailRequest {
   string sign_up_token = 1;
   string verification_code = 2;
 }
 
-message SignUpFinalizeResponse {
+message SignUpConfirmEmailResponse {
+  string sign_up_token = 1;
+}
+
+message SignUpEnterPasswordRequest {
+  string sign_up_token = 1;
+  string password = 2;
+}
+
+message SignUpEnterPasswordResponse {
   string session_id = 1;
 }
 
@@ -49,4 +83,3 @@ message HandleOauthCallbackRequest {
 message HandleOauthCallbackResponse {
   string session_id = 1;
 }
-

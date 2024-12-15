@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: api/grpc/v1/sign_up.proto
+// source: v1/sign_up.proto
 
 package v1
 
@@ -20,7 +20,8 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	SignUpService_SignUpInit_FullMethodName          = "/v1.SignUpService/SignUpInit"
-	SignUpService_SignUpFinalize_FullMethodName      = "/v1.SignUpService/SignUpFinalize"
+	SignUpService_SignUpConfirmEmail_FullMethodName  = "/v1.SignUpService/SignUpConfirmEmail"
+	SignUpService_SignUpEnterPassword_FullMethodName = "/v1.SignUpService/SignUpEnterPassword"
 	SignUpService_GetOauthSignUpUrls_FullMethodName  = "/v1.SignUpService/GetOauthSignUpUrls"
 	SignUpService_HandleOauthCallback_FullMethodName = "/v1.SignUpService/HandleOauthCallback"
 )
@@ -30,7 +31,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SignUpServiceClient interface {
 	SignUpInit(ctx context.Context, in *SignUpInitRequest, opts ...grpc.CallOption) (*SignUpInitResponse, error)
-	SignUpFinalize(ctx context.Context, in *SignUpFinalizeRequest, opts ...grpc.CallOption) (*SignUpFinalizeResponse, error)
+	SignUpConfirmEmail(ctx context.Context, in *SignUpConfirmEmailRequest, opts ...grpc.CallOption) (*SignUpConfirmEmailResponse, error)
+	SignUpEnterPassword(ctx context.Context, in *SignUpEnterPasswordRequest, opts ...grpc.CallOption) (*SignUpEnterPasswordResponse, error)
 	GetOauthSignUpUrls(ctx context.Context, in *GetOauthSignUpUrlRequest, opts ...grpc.CallOption) (*GetOauthSignUpUrlResponse, error)
 	HandleOauthCallback(ctx context.Context, in *HandleOauthCallbackRequest, opts ...grpc.CallOption) (*HandleOauthCallbackResponse, error)
 }
@@ -53,10 +55,20 @@ func (c *signUpServiceClient) SignUpInit(ctx context.Context, in *SignUpInitRequ
 	return out, nil
 }
 
-func (c *signUpServiceClient) SignUpFinalize(ctx context.Context, in *SignUpFinalizeRequest, opts ...grpc.CallOption) (*SignUpFinalizeResponse, error) {
+func (c *signUpServiceClient) SignUpConfirmEmail(ctx context.Context, in *SignUpConfirmEmailRequest, opts ...grpc.CallOption) (*SignUpConfirmEmailResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SignUpFinalizeResponse)
-	err := c.cc.Invoke(ctx, SignUpService_SignUpFinalize_FullMethodName, in, out, cOpts...)
+	out := new(SignUpConfirmEmailResponse)
+	err := c.cc.Invoke(ctx, SignUpService_SignUpConfirmEmail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *signUpServiceClient) SignUpEnterPassword(ctx context.Context, in *SignUpEnterPasswordRequest, opts ...grpc.CallOption) (*SignUpEnterPasswordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SignUpEnterPasswordResponse)
+	err := c.cc.Invoke(ctx, SignUpService_SignUpEnterPassword_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +100,8 @@ func (c *signUpServiceClient) HandleOauthCallback(ctx context.Context, in *Handl
 // for forward compatibility.
 type SignUpServiceServer interface {
 	SignUpInit(context.Context, *SignUpInitRequest) (*SignUpInitResponse, error)
-	SignUpFinalize(context.Context, *SignUpFinalizeRequest) (*SignUpFinalizeResponse, error)
+	SignUpConfirmEmail(context.Context, *SignUpConfirmEmailRequest) (*SignUpConfirmEmailResponse, error)
+	SignUpEnterPassword(context.Context, *SignUpEnterPasswordRequest) (*SignUpEnterPasswordResponse, error)
 	GetOauthSignUpUrls(context.Context, *GetOauthSignUpUrlRequest) (*GetOauthSignUpUrlResponse, error)
 	HandleOauthCallback(context.Context, *HandleOauthCallbackRequest) (*HandleOauthCallbackResponse, error)
 	mustEmbedUnimplementedSignUpServiceServer()
@@ -104,8 +117,11 @@ type UnimplementedSignUpServiceServer struct{}
 func (UnimplementedSignUpServiceServer) SignUpInit(context.Context, *SignUpInitRequest) (*SignUpInitResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignUpInit not implemented")
 }
-func (UnimplementedSignUpServiceServer) SignUpFinalize(context.Context, *SignUpFinalizeRequest) (*SignUpFinalizeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SignUpFinalize not implemented")
+func (UnimplementedSignUpServiceServer) SignUpConfirmEmail(context.Context, *SignUpConfirmEmailRequest) (*SignUpConfirmEmailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignUpConfirmEmail not implemented")
+}
+func (UnimplementedSignUpServiceServer) SignUpEnterPassword(context.Context, *SignUpEnterPasswordRequest) (*SignUpEnterPasswordResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignUpEnterPassword not implemented")
 }
 func (UnimplementedSignUpServiceServer) GetOauthSignUpUrls(context.Context, *GetOauthSignUpUrlRequest) (*GetOauthSignUpUrlResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOauthSignUpUrls not implemented")
@@ -152,20 +168,38 @@ func _SignUpService_SignUpInit_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SignUpService_SignUpFinalize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SignUpFinalizeRequest)
+func _SignUpService_SignUpConfirmEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignUpConfirmEmailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SignUpServiceServer).SignUpFinalize(ctx, in)
+		return srv.(SignUpServiceServer).SignUpConfirmEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SignUpService_SignUpFinalize_FullMethodName,
+		FullMethod: SignUpService_SignUpConfirmEmail_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SignUpServiceServer).SignUpFinalize(ctx, req.(*SignUpFinalizeRequest))
+		return srv.(SignUpServiceServer).SignUpConfirmEmail(ctx, req.(*SignUpConfirmEmailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SignUpService_SignUpEnterPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignUpEnterPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SignUpServiceServer).SignUpEnterPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SignUpService_SignUpEnterPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SignUpServiceServer).SignUpEnterPassword(ctx, req.(*SignUpEnterPasswordRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -218,8 +252,12 @@ var SignUpService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SignUpService_SignUpInit_Handler,
 		},
 		{
-			MethodName: "SignUpFinalize",
-			Handler:    _SignUpService_SignUpFinalize_Handler,
+			MethodName: "SignUpConfirmEmail",
+			Handler:    _SignUpService_SignUpConfirmEmail_Handler,
+		},
+		{
+			MethodName: "SignUpEnterPassword",
+			Handler:    _SignUpService_SignUpEnterPassword_Handler,
 		},
 		{
 			MethodName: "GetOauthSignUpUrls",
@@ -231,5 +269,5 @@ var SignUpService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/grpc/v1/sign_up.proto",
+	Metadata: "v1/sign_up.proto",
 }

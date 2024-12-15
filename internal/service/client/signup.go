@@ -3,8 +3,9 @@ package client
 import (
 	"context"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/google/uuid"
 	"github.com/teachme-group/user/pkg/errlist"
+	oauthCli "github.com/teachme-group/user/pkg/oauth"
 	"github.com/teachme-group/user/pkg/random"
 	"github.com/teachme-group/user/pkg/signer"
 	"github.com/teachme-group/user/pkg/validate"
@@ -42,21 +43,14 @@ func (s *service) SignUpRequest(
 		return response, err
 	}
 
-	encryptedPass, err := signer.EncryptPassword(request.Password)
-	if err != nil {
-		return response, err
-	}
-
 	if err = s.repos.SaveSignUpStep(ctx, request.SignUpToken, domain.SignUpStep{
 		PrevStep: domain.StepStartSignUp,
-		StepData: map[domain.Step]interface{}{
-			domain.StepStartSignUp: domain.StartSignUpStepData{
-				Email:              request.Email,
-				Login:              request.Login,
-				Password:           encryptedPass,
-				SignUpSessionToken: request.SignUpToken,
-				VerifyCode:         verifyCode,
-			},
+		StepData: domain.StepData{
+			Email:              request.Email,
+			Login:              request.Login,
+			SignUpSessionToken: request.SignUpToken,
+			VerifyCode:         verifyCode,
+			SignUpSource:       domain.SignUpSourceNative,
 		},
 	}, s.cfg.SignUpSessionTimeout); err != nil {
 		return response, err
@@ -68,10 +62,10 @@ func (s *service) SignUpRequest(
 	}, nil
 }
 
-func (s *service) SignUpConfirm(
+func (s *service) SignUpConfirmEmail(
 	ctx context.Context,
-	request *v1.SignUpFinalizeRequest,
-) (response *v1.SignUpFinalizeResponse, err error) {
+	request *v1.SignUpConfirmEmailRequest,
+) (response *v1.SignUpConfirmEmailResponse, err error) {
 	ctx, span, _ := tracer.NewSpan(ctx)
 	defer span.Finish()
 
@@ -84,18 +78,54 @@ func (s *service) SignUpConfirm(
 		return response, errlist.ErrInvalidSignUpStep
 	}
 
-	startData := domain.StartSignUpStepData{}
-
-	err = mapstructure.Decode(step.StepData[domain.StepStartSignUp], &startData)
-	if err != nil {
-		return response, err
-	}
+	startData := step.StepData
 
 	if startData.SignUpSessionToken != request.SignUpToken {
 		return response, errlist.ErrInvalidSignUpToken
 	}
-	if startData.VerifyCode != request.VerificationCode {
+	if startData.VerifyCode != request.VerificationCode && startData.SignUpSource == domain.SignUpSourceNative {
 		return response, errlist.ErrInvalidVerifyCode
+	}
+
+	step.StepData.EmailConfirmed = true
+
+	if err = s.repos.SaveSignUpStep(ctx, request.SignUpToken, domain.SignUpStep{
+		PrevStep: domain.ConfirmEmail,
+		StepData: step.StepData,
+	}, s.cfg.SignUpSessionTimeout); err != nil {
+		return response, err
+	}
+
+	return &v1.SignUpConfirmEmailResponse{
+		SignUpToken: request.SignUpToken,
+	}, nil
+}
+
+func (s *service) SignUpEnterPassword(
+	ctx context.Context,
+	request *v1.SignUpEnterPasswordRequest,
+) (response *v1.SignUpEnterPasswordResponse, err error) {
+	ctx, span, _ := tracer.NewSpan(ctx)
+	defer span.Finish()
+
+	step, err := s.repos.GetSignUpStep(ctx, request.SignUpToken)
+	if err != nil {
+		return response, err
+	}
+
+	if step.PrevStep != domain.ConfirmEmail {
+		return response, errlist.ErrInvalidSignUpStep
+	}
+
+	startData := step.StepData
+
+	if startData.SignUpSessionToken != request.SignUpToken {
+		return response, errlist.ErrInvalidSignUpToken
+	}
+
+	startData.Password, err = signer.EncryptPassword(request.Password)
+	if err != nil {
+		return response, err
 	}
 
 	user, err := s.repos.CreateUser(ctx, domain.User{
@@ -114,7 +144,61 @@ func (s *service) SignUpConfirm(
 		return response, err
 	}
 
-	return &v1.SignUpFinalizeResponse{
+	return &v1.SignUpEnterPasswordResponse{
 		SessionId: resp.AccessToken,
+	}, nil
+}
+
+func (s *service) GetOauthSignUpUrls(
+	ctx context.Context,
+	in *v1.GetOauthSignUpUrlRequest,
+) (*v1.GetOauthSignUpUrlResponse, error) {
+	ctx, span, _ := tracer.NewSpan(ctx)
+	defer span.Finish()
+
+	urls, err := s.oauth.AuthCodeURLs(uuid.NewString(), in.OauthProvider)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.GetOauthSignUpUrlResponse{
+		Urls: urls,
+	}, nil
+}
+
+func (s *service) GoogleSignUpCallback(
+	ctx context.Context,
+	request *v1.HandleOauthCallbackRequest,
+) (response *v1.HandleOauthCallbackResponse, err error) {
+	ctx, span, _ := tracer.NewSpan(ctx)
+	defer span.Finish()
+
+	userInfo, err := s.oauth.ProcessCallback(
+		ctx,
+		oauthCli.Google,
+		request.GetBody(),
+		request.GetCallbackUrl(),
+	)
+	if err != nil {
+		return response, err
+	}
+
+	sessionID := uuid.NewString()
+
+	if err = s.repos.SaveSignUpStep(ctx, sessionID, domain.SignUpStep{
+		PrevStep: domain.ConfirmEmail,
+		StepData: domain.StepData{
+			Email:              userInfo.Email,
+			Login:              userInfo.Login,
+			SignUpSource:       domain.SignUpSourceOauth,
+			SignUpSessionToken: sessionID,
+			EmailConfirmed:     true,
+		},
+	}, s.cfg.SignUpSessionTimeout); err != nil {
+		return response, err
+	}
+
+	return &v1.HandleOauthCallbackResponse{
+		SessionId: sessionID,
 	}, nil
 }
