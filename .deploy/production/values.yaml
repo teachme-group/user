@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-app
-  namespace: production
+  name: user
+  namespace: default
 spec:
   replicas: 3
   selector:
