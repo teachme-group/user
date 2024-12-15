@@ -40,6 +40,7 @@ func (r *repository) CreateUser(ctx context.Context, user domain.User) (created 
 			Time:  time.Now(),
 			Valid: true,
 		},
+		Password: user.Password,
 	})
 	if err != nil {
 		return created, fmt.Errorf("failed to create user: %w", err)

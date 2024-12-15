@@ -4,10 +4,24 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	cfgLoader "github.com/Markuysa/pkg/config"
+	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/teachme-group/user/internal/app"
 	"github.com/teachme-group/user/internal/config"
+)
+
+var (
+	tag            = "unknown"
+	commit         = "unknown"
+	runningVersion = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "running_version",
+		Help: "Running version of the application",
+	},
+		[]string{"version", "commit", "build_time"},
+	)
 )
 
 const (
@@ -29,4 +43,17 @@ func main() {
 	if err = app.Run(ctx, cfg); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func onBuild() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("error loading .env file")
+	}
+
+	prometheus.MustRegister(runningVersion)
+
+	builtAt := time.Now().String()
+
+	runningVersion.WithLabelValues(tag, commit, builtAt).Set(1)
 }

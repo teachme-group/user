@@ -1,3 +1,5 @@
+begin;
+
 create table "user"
 (
     id         uuid primary key,
@@ -7,4 +9,5 @@ create table "user"
     created_at timestamp not null
 );
 
+commit ;
 
