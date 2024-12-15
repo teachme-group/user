@@ -9,8 +9,8 @@ import (
 	cfgLoader "github.com/Markuysa/pkg/config"
 	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/teachme-group/user/config"
 	"github.com/teachme-group/user/internal/app"
-	"github.com/teachme-group/user/internal/config"
 )
 
 var (

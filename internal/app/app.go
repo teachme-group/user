@@ -11,7 +11,7 @@ import (
 	"github.com/Markuysa/pkg/postgres"
 	"github.com/Markuysa/pkg/redis"
 	"github.com/Markuysa/pkg/srv/grpc"
-	"github.com/teachme-group/user/internal/config"
+	"github.com/teachme-group/user/config"
 	"github.com/teachme-group/user/internal/misc/clients/session"
 	clientRepos "github.com/teachme-group/user/internal/repository/client"
 	clientSrv "github.com/teachme-group/user/internal/service/client"
