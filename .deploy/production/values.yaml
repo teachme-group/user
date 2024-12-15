@@ -20,7 +20,7 @@ spec:
             - containerPort: 8000
           env:
             - name: CONFIG_PATH
-              value: "internal/config/config.yaml"
+              value: "./internal/config/config.yaml"
           volumeMounts:
             - name: config-data
               mountPath: /internal/config
