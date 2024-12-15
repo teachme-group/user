@@ -71,9 +71,11 @@ spec:
   selector:
     app: user
   ports:
-    - protocol: TCP
+    - name: grpc
+      protocol: TCP
       port: 5000
       targetPort: 5000
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 8000
       targetPort: 8000
