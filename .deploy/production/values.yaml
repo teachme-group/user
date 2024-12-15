@@ -23,7 +23,7 @@ spec:
               value: "internal/config/config.yaml"
           volumeMounts:
             - name: config-volume
-              mountPath: internal/config
+              mountPath: internal/config/config.yaml
           readinessProbe:
             httpGet:
               path: /health
