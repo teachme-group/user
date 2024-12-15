@@ -2,9 +2,14 @@ package client
 
 import (
 	"context"
-	"pkg/errlist"
-	"pkg/signer"
-	"pkg/validate"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/teachme-group/user/pkg/errlist"
+	"github.com/teachme-group/user/pkg/random"
+	"github.com/teachme-group/user/pkg/signer"
+	"github.com/teachme-group/user/pkg/validate"
+
+	sessionStorageV1 "github.com/teachme-group/session/pkg/api/grpc/v1"
 	v1 "github.com/teachme-group/user/pkg/api/grpc/v1"
 
 	"github.com/Markuysa/pkg/tracer"
@@ -14,24 +19,35 @@ import (
 func (s *service) SignUpRequest(
 	ctx context.Context,
 	request *v1.SignUpInitRequest,
-) (signUpToken string, codeTTL int64, err error) {
+) (response *v1.SignUpInitResponse, err error) {
 	ctx, span, _ := tracer.NewSpan(ctx)
 	defer span.Finish()
 
 	if !validate.Email(request.Email) {
-		return signUpToken, codeTTL, errlist.ErrInvalidEmail
+		return response, errlist.ErrInvalidEmail
 	}
 
 	if err = s.repos.ValidateUserSignUp(ctx, request.Email); err != nil {
-		return signUpToken, codeTTL, err
+		return response, err
+	}
+
+	verifyCode := random.NewConfirmationCode()
+
+	if err = s.mailer.Send(
+		ctx,
+		request.Email,
+		"Sign Up",
+		"Your code: "+verifyCode,
+	); err != nil {
+		return response, err
 	}
 
 	encryptedPass, err := signer.EncryptPassword(request.Password)
 	if err != nil {
-		return signUpToken, codeTTL, err
+		return response, err
 	}
 
-	if err = s.repos.SaveSignUpStep(ctx, request.Email, domain.SignUpStep{
+	if err = s.repos.SaveSignUpStep(ctx, request.SignUpToken, domain.SignUpStep{
 		PrevStep: domain.StepStartSignUp,
 		StepData: map[domain.Step]interface{}{
 			domain.StepStartSignUp: domain.StartSignUpStepData{
@@ -39,13 +55,17 @@ func (s *service) SignUpRequest(
 				Login:              request.Login,
 				Password:           encryptedPass,
 				SignUpSessionToken: request.SignUpToken,
+				VerifyCode:         verifyCode,
 			},
 		},
-	}, s.cfg.SIgnUpSessionTimeout); err != nil {
-		return signUpToken, codeTTL, err
+	}, s.cfg.SignUpSessionTimeout); err != nil {
+		return response, err
 	}
 
-	return request.SignUpToken, 0, nil
+	return &v1.SignUpInitResponse{
+		SignUpToken:           request.GetSignUpToken(),
+		SignUpSessionLifetime: s.cfg.SignUpSessionTimeout.Milliseconds(),
+	}, nil
 }
 
 func (s *service) SignUpConfirm(
@@ -64,13 +84,18 @@ func (s *service) SignUpConfirm(
 		return response, errlist.ErrInvalidSignUpStep
 	}
 
-	startData, ok := step.StepData[domain.StepStartSignUp].(domain.StartSignUpStepData)
-	if !ok {
-		return response, errlist.ErrInvalidSignUpStep
+	startData := domain.StartSignUpStepData{}
+
+	err = mapstructure.Decode(step.StepData[domain.StepStartSignUp], &startData)
+	if err != nil {
+		return response, err
 	}
 
 	if startData.SignUpSessionToken != request.SignUpToken {
 		return response, errlist.ErrInvalidSignUpToken
+	}
+	if startData.VerifyCode != request.VerificationCode {
+		return response, errlist.ErrInvalidVerifyCode
 	}
 
 	user, err := s.repos.CreateUser(ctx, domain.User{
@@ -82,7 +107,14 @@ func (s *service) SignUpConfirm(
 		return response, err
 	}
 
-	if err
+	resp, err := s.sessionStorage.ClientSetSession(ctx, &sessionStorageV1.ClientSetSessionRequest{
+		ClientId: user.ID.String(),
+	})
+	if err != nil {
+		return response, err
+	}
 
-	return nil
+	return &v1.SignUpFinalizeResponse{
+		SessionId: resp.AccessToken,
+	}, nil
 }

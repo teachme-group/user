@@ -9,8 +9,10 @@ const (
 type (
 	SignUpStep struct {
 		PrevStep Step
-		StepData map[Step]interface{}
+		StepData StepData
 	}
+
+	StepData map[Step]interface{}
 
 	StartSignUpStepData struct {
 		Email              string

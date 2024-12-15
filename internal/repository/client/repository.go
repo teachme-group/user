@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/teachme-group/user/internal/domain"
 	"github.com/teachme-group/user/internal/storage/postgres"
 	"github.com/teachme-group/user/internal/storage/redis"
+	"github.com/teachme-group/user/pkg/errlist"
 )
 
 type repository struct {
@@ -44,10 +46,37 @@ func (r *repository) CreateUser(ctx context.Context, user domain.User) (created 
 	return userFromRepository(pgUser), nil
 }
 
-func (r *repository) SaveEmailConfirmationCode(
-	ctx context.Context,
-	key string,
-	code int,
-) error {
-	return r.redis.Save(ctx, key, code, time.Hour)
+func (r *repository) SaveSignUpStep(ctx context.Context, key string, step domain.SignUpStep, ttl time.Duration) error {
+	return r.redis.Save(ctx, key, step, ttl)
+}
+
+func (r *repository) GetSignUpStep(ctx context.Context, key string) (domain.SignUpStep, error) {
+	result := domain.SignUpStep{}
+
+	resp, err := r.redis.Get(ctx, key)
+	if err != nil {
+		return result, fmt.Errorf("failed to get sign up step: %w", err)
+	}
+
+	err = json.Unmarshal(resp, &result)
+	if err != nil {
+		return result, fmt.Errorf("failed to unmarshal sign up step: %w", err)
+	}
+
+	return result, nil
+}
+
+func (r *repository) ValidateUserSignUp(ctx context.Context, email string) error {
+	result, err := r.pgConn.Queries(ctx).ValidateUserSignUp(ctx, postgres.ValidateUserSignUpParams{
+		Email: email,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to validate user sign up: %w", err)
+	}
+
+	if result {
+		return errlist.ErrLoginOrEmailAlreadyExists
+	}
+
+	return nil
 }

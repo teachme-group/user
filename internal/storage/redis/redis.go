@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -21,5 +22,22 @@ func (r *redisStorage) Save(
 	value interface{},
 	ttl time.Duration,
 ) error {
-	return r.rd.Set(ctx, key, value, ttl).Err()
+	resp, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return r.rd.Set(ctx, key, resp, ttl).Err()
+}
+
+func (r *redisStorage) Get(
+	ctx context.Context,
+	key string,
+) ([]byte, error) {
+	resp, err := r.rd.Get(ctx, key).Bytes()
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }

@@ -1,9 +1,9 @@
 package mail
 
 type Config struct {
-	SmtpHost string `validate:"required"`
-	SmtpPort int    `validate:"required"`
+	SmtpHost string `validate:"required" yaml:"smtp_host"`
+	SmtpPort int    `validate:"required" yaml:"smtp_port"`
 
-	From     string `validate:"required"`
+	Username string `validate:"required"`
 	Password string `validate:"required"`
 }

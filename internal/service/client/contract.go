@@ -2,10 +2,12 @@ package client
 
 import (
 	"context"
-	v1 "session/pkg/api/grpc/v1"
 	"time"
 
+	v1 "github.com/teachme-group/session/pkg/api/grpc/v1"
 	"github.com/teachme-group/user/internal/domain"
+	oauthCli "github.com/teachme-group/user/pkg/oauth"
+	"golang.org/x/oauth2"
 )
 
 type (
@@ -19,6 +21,10 @@ type (
 		Send(ctx context.Context, to, subject, body string) error
 	}
 	sessionStorage interface {
-		ClientSetSession(ctx context.Context, req *v1.ClientSetSessionRequest) (*v1.ClientSetSessionResponse, error)
+		ClientSetSession(ctx context.Context, in *v1.ClientSetSessionRequest) (*v1.ClientSetSessionResponse, error)
+	}
+	oauthClient interface {
+		AuthCodeURLs(state string, provider *string, opts ...oauth2.AuthCodeOption) (map[string]string, error)
+		ProcessCallback(ctx context.Context, provider oauthCli.Provider, body []byte, url string) (domain.User, error)
 	}
 )

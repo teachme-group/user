@@ -10,6 +10,7 @@ func userFromRepository(user postgres.User) domain.User {
 		ID:        user.ID.Bytes,
 		Email:     user.Email,
 		Login:     user.Login,
+		Password:  user.Password,
 		CreatedAt: user.CreatedAt.Time,
 	}
 }

@@ -12,23 +12,23 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-insert into "user" (id, login, email, created_at)
+insert into "user" (login, email, password, created_at)
 values ($1, $2, $3, $4)
-    returning id, login, email, created_at
+    returning id, login, email, password, created_at
 `
 
 type CreateUserParams struct {
-	ID        pgtype.UUID
 	Login     string
 	Email     string
+	Password  string
 	CreatedAt pgtype.Timestamp
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser,
-		arg.ID,
 		arg.Login,
 		arg.Email,
+		arg.Password,
 		arg.CreatedAt,
 	)
 	var i User
@@ -36,7 +36,24 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.ID,
 		&i.Login,
 		&i.Email,
+		&i.Password,
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const validateUserSignUp = `-- name: ValidateUserSignUp :one
+select exists(select 1 from "user" where login = $1 or email = $2) as exists
+`
+
+type ValidateUserSignUpParams struct {
+	Login string
+	Email string
+}
+
+func (q *Queries) ValidateUserSignUp(ctx context.Context, arg ValidateUserSignUpParams) (bool, error) {
+	row := q.db.QueryRow(ctx, validateUserSignUp, arg.Login, arg.Email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package v1;
+
+option go_package = "/v1";
+
+service SignInService {
+  rpc SignInInit(SignInInitRequest) returns (SignInInitResponse) {}
+  rpc SignInFinalize(SignInFinalizeRequest) returns (SignInFinalizeResponse) {}
+}
+
+message SignInInitRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message SignInInitResponse {
+  string session_id = 1;
+}
+
+message SignInFinalizeRequest {
+  string session_id = 1;
+  string otp = 2;
+}
+
+message SignInFinalizeResponse {}

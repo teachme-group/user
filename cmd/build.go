@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/Markuysa/pkg/log"
+	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -21,6 +23,11 @@ var (
 )
 
 func onBuild() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("error loading .env file")
+	}
+
 	prometheus.MustRegister(runningVersion)
 
 	builtAt := time.Now().String()

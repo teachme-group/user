@@ -1,14 +1,15 @@
 syntax = "proto3";
 
-package user.v1;
+package v1;
 
 option go_package = "/v1";
 
-service UserService {
+service SignUpService {
   rpc SignUpInit(SignUpInitRequest) returns (SignUpInitResponse) {}
   rpc SignUpFinalize(SignUpFinalizeRequest) returns (SignUpFinalizeResponse) {}
-  rpc SignInInit(SignInInitRequest) returns (SignInInitResponse) {}
-  rpc SignInFinalize(SignInFinalizeRequest) returns (SignInFinalizeResponse) {}
+
+  rpc GetOauthSignUpUrls(GetOauthSignUpUrlRequest) returns (GetOauthSignUpUrlResponse) {}
+  rpc HandleOauthCallback(HandleOauthCallbackRequest) returns (HandleOauthCallbackResponse) {}
 }
 
 message SignUpInitRequest {
@@ -32,18 +33,20 @@ message SignUpFinalizeResponse {
   string session_id = 1;
 }
 
-message SignInInitRequest {
-  string email = 1;
-  string password = 2;
+message GetOauthSignUpUrlRequest {
+  optional string oauth_provider = 1;
 }
 
-message SignInInitResponse {
+message GetOauthSignUpUrlResponse {
+  map<string, string> urls = 1;
+}
+
+message HandleOauthCallbackRequest {
+  bytes body = 1;
+  string callback_url = 2;
+}
+
+message HandleOauthCallbackResponse {
   string session_id = 1;
 }
 
-message SignInFinalizeRequest {
-  string session_id = 1;
-  string otp = 2;
-}
-
-message SignInFinalizeResponse {}
