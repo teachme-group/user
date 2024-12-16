@@ -3,7 +3,7 @@ module github.com/teachme-group/user
 go 1.23.3
 
 require (
-	github.com/Markuysa/pkg v1.3.10
+	github.com/Markuysa/pkg v1.3.12
 	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.24.0
